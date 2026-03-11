@@ -33,24 +33,22 @@ export function Emoji({
         return null;
     }
 
-    return (
-        <span
-            onClick={onClick}
-            className='emoticon'
-            aria-label={`:${emojiName}:`}
-            data-emoticon={emojiName}
-            style={{
-                backgroundImage: `url(${emojiImageUrl})`,
-                backgroundSize: 'contain',
-                height: size,
-                width: size,
-                maxHeight: size,
-                maxWidth: size,
-                minHeight: size,
-                minWidth: size,
-                overflow: 'hidden',
-                ...emojiStyle,
-            }}
-        />
-    );
+    return React.createElement('span', {
+        onClick,
+        className: 'emoticon',
+        'aria-label': `:${emojiName}:`,
+        'data-emoticon': emojiName,
+        style: {
+            backgroundImage: `url(${emojiImageUrl})`,
+            backgroundSize: 'contain',
+            height: size,
+            width: size,
+            maxHeight: size,
+            maxWidth: size,
+            minHeight: size,
+            minWidth: size,
+            overflow: 'hidden',
+            ...emojiStyle,
+        },
+    });
 }
