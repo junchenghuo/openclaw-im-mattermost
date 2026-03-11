@@ -101,3 +101,38 @@ make run
 
 - 本仓库用于 `openclaw-im-mattermost` 的二次开发与持续迭代。
 - 当前文档聚焦显示改造与 OpenClaw 集成目标，后续按里程碑持续补充。
+
+---
+
+## 作者介绍（详细）
+
+### 霍钧城（分布式 AI 架构师）
+
+具备多年企业级研发与架构经验，长期聚焦“高并发分布式系统 + 电商交易中台 + AI 应用落地”的融合架构实践。
+
+**技术架构能力（Technical Architecture）**
+
+- 具备从单体到微服务的架构演进经验，熟悉 Spring Cloud、网关、配置中心、任务调度、消息中间件与可观测体系建设。
+- 擅长高并发与高可用设计，围绕缓存分层、异步解耦、分布式锁、最终一致性、熔断限流等方案提升系统稳定性。
+- 有云原生工程化落地经验，能够基于 Docker/K8s/Jenkins/DevOps 构建持续交付与自动化发布体系。
+
+**业务架构能力（Business Architecture）**
+
+- 深度参与 B2B2C 电商与供应链场景，覆盖商品、订单、库存、支付、分账、结算、对账等核心链路。
+- 具备统一支付中台设计经验，支持多支付渠道接入、多级分账与实时结算，保障交易链路一致性与可追踪性。
+- 强调平台化与中台化建设，通过通用能力抽象与组件复用，支撑多端业务持续迭代与规模增长。
+- 面向业务智能化升级，推动企业级 Agent 在客服、运营、风控、供应链协同等场景落地，形成“人+AI+系统”协作闭环。
+- 具备数字员工体系设计经验，围绕岗位职责、工具权限、SOP 流程与绩效指标构建可运营的 AI Workforce。
+
+**AI 架构能力（AI Architecture / Agent Engineering）**
+
+- 具备大模型平台化搭建与使用能力，支持多模型接入、模型路由、推理参数治理与成本/延迟/效果平衡。
+- 基于 Spring AI + Qwen/DeepSeek/OpenAI 等模型构建企业级 AI 应用，覆盖智能问答、流程自动化、AI Copilot 与数字员工。
+- 采用 RAG + Hybrid Search（向量检索 + 关键词检索）+ Rerank 架构，提升企业知识问答准确率与可解释性。
+- 结合 Function Calling / Tool Calling 打通“自然语言意图 -> 业务操作执行”闭环，实现 Agentic Workflow 的工程化落地。
+- 构建 MCP（Model Context Protocol）工具生态，沉淀 MCP Server 与标准化能力接口，支持跨系统工具编排与安全调用。
+- 建设 Skills（技能）资产体系，将高频业务能力封装为可复用 Skill，支持版本化、灰度发布与持续迭代。
+- 推动 Multi-Agent 协作模式，在复杂任务中通过 Planner/Executor/Reviewer 等角色分工提升稳定性与产出质量。
+- 强化 AI 工程化治理（PromptOps、EvalOps、Guardrails、Observability），实现从 PoC 到 Production 的可持续演进。
+
+该仓库围绕 Mattermost 的二次开发与 OpenClaw 集成，也延续了上述方法论：先保证协作链路可用，再推动任务编排自动化，最后实现可观测、可复盘、可持续优化的数字员工体系。
