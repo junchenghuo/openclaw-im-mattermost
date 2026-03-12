@@ -14,7 +14,7 @@
 
     display: inline-flex;
     min-width: 28px;
-    height: 24px;
+    min-height: 24px;
     align-items: center;
     padding: 0 5px;
     border: 1px solid transparent;
@@ -58,6 +58,7 @@
 
     &.Reaction__add {
         position: relative;
+        height: 24px;
         font-size: 20px;
         line-height: 0;
         vertical-align: middle;
@@ -97,15 +98,23 @@
     }
 
     &__users {
-        max-width: 260px;
+        max-width: none;
         margin-left: 6px;
-        overflow: hidden;
+        overflow: visible;
         font-size: 11px;
         font-weight: 500;
         line-height: 16px;
         pointer-events: none;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        text-overflow: clip;
+        white-space: normal;
+        word-break: break-word;
+    }
+
+    &__inner {
+        display: flex;
+        width: 100%;
+        align-items: center;
+        flex-wrap: wrap;
     }
 
     &.Reaction--reacted,

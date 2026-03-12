@@ -196,7 +196,7 @@ export class Reaction extends React.PureComponent<Props, State> {
         const display = (displayNumber > 0) ? displayNumber : '';
         const readOnlyClass = (canAddReactions && canRemoveReactions) ? '' : 'Reaction--read-only';
         const otherUsersCount = reactions.length - users.length;
-        const reactionUsersLabel = buildReactionUsersLabel(emojiName, users, otherUsersCount);
+        const reactionUsersLabel = buildReactionUsersLabel(users, otherUsersCount);
 
         const emojiNameWithSpaces = this.props.emojiName.replace(/_/g, ' ');
         let ariaLabelEmoji = `${emojiNameWithSpaces}`;
@@ -352,23 +352,14 @@ export class Reaction extends React.PureComponent<Props, State> {
     }
 }
 
-function buildReactionUsersLabel(emojiName: string, users: string[], otherUsersCount: number) {
-    const emojiLabel = formatEmojiLabel(emojiName);
-    const triggeredByUsers = users.map((userName) => `${emojiLabel} ${userName}`);
+function buildReactionUsersLabel(users: string[], otherUsersCount: number) {
+    const triggeredByUsers = [...users];
 
     if (otherUsersCount > 0) {
-        triggeredByUsers.push(`${emojiLabel} +${otherUsersCount}`);
+        triggeredByUsers.push(`+${otherUsersCount}`);
     }
 
     return triggeredByUsers.join(', ');
-}
-
-function formatEmojiLabel(emojiName: string) {
-    const label = emojiName.replace(/_/g, ' ').trim();
-    if (/^[a-z]{1,4}$/i.test(label)) {
-        return label.toUpperCase();
-    }
-    return label;
 }
 
 export default injectIntl(Reaction);
