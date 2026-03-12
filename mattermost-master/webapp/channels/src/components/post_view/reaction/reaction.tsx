@@ -195,14 +195,14 @@ export class Reaction extends React.PureComponent<Props, State> {
         const reacted = (reactedNumber > 0) ? reactedNumber : '';
         const display = (displayNumber > 0) ? displayNumber : '';
         const readOnlyClass = (canAddReactions && canRemoveReactions) ? '' : 'Reaction--read-only';
+        const otherUsersCount = reactions.length - users.length;
+        const reactionUsersLabel = buildReactionUsersLabel(emojiName, users, otherUsersCount);
 
         const emojiNameWithSpaces = this.props.emojiName.replace(/_/g, ' ');
         let ariaLabelEmoji = `${emojiNameWithSpaces}`;
 
         // If intl/users are available, append the same sentence shown in the tooltip
         if (intl) {
-            const otherUsersCount = reactions.length - users.length;
-
             let names: string | undefined;
             if (otherUsersCount > 0) {
                 if (users.length > 0) {
@@ -320,7 +320,7 @@ export class Reaction extends React.PureComponent<Props, State> {
                     onClick={this.handleClick}
                     ref={this.reactionButtonRef}
                 >
-                    <span className='d-flex align-items-center'>
+                    <span className='Reaction__inner'>
                         {emojiIcon}
                         <span
                             ref={this.reactionCountRef}
@@ -337,11 +337,38 @@ export class Reaction extends React.PureComponent<Props, State> {
                                 <span className='Reaction__number--reacted'>{reacted}</span>
                             </span>
                         </span>
+                        {reactionUsersLabel && (
+                            <span
+                                className='Reaction__users'
+                                title={reactionUsersLabel}
+                            >
+                                {reactionUsersLabel}
+                            </span>
+                        )}
                     </span>
                 </button>
             </ReactionTooltip>
         );
     }
+}
+
+function buildReactionUsersLabel(emojiName: string, users: string[], otherUsersCount: number) {
+    const emojiLabel = formatEmojiLabel(emojiName);
+    const triggeredByUsers = users.map((userName) => `${emojiLabel} ${userName}`);
+
+    if (otherUsersCount > 0) {
+        triggeredByUsers.push(`${emojiLabel} +${otherUsersCount}`);
+    }
+
+    return triggeredByUsers.join(', ');
+}
+
+function formatEmojiLabel(emojiName: string) {
+    const label = emojiName.replace(/_/g, ' ').trim();
+    if (/^[a-z]{1,4}$/i.test(label)) {
+        return label.toUpperCase();
+    }
+    return label;
 }
 
 export default injectIntl(Reaction);
