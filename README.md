@@ -30,6 +30,12 @@
 - 清理历史示例交付物（`projects/login-page-delivery` 与 `projects/common-ui-components` 下旧文档与图片），降低仓库冗余。
 - 保留并强化“Leader 统一调度、角色标准回执”的协作约束，便于后续任务编排与过程审计。
 
+## 本次改进点（2026-03-14）
+
+- 为多角色协议文件补充 Mattermost 快速已读规则：收到消息先加 `:ok_hand:`，再回执 `已接单/done/blocked`。
+- 清理历史示例交付物（`projects/login-page-delivery` 与 `projects/common-ui-components` 下旧文档与图片），降低仓库冗余。
+- 保留并强化“Leader 统一调度、角色标准回执”的协作约束，便于后续任务编排与过程审计。
+
 ---
 
 ## 当前改造范围（2026-03-11）
