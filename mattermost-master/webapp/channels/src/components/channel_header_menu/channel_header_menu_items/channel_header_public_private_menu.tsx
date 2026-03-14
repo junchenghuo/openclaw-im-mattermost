@@ -21,6 +21,7 @@ import MenuItemArchiveChannel from '../menu_items/archive_channel';
 import MenuItemAutotranslation from '../menu_items/autotranslation';
 import MenuItemChannelBookmarks from '../menu_items/channel_bookmarks_submenu';
 import MenuItemChannelSettings from '../menu_items/channel_settings_menu';
+import MenuItemClearChannelHistory from '../menu_items/clear_channel_history';
 import MenuItemCloseChannel from '../menu_items/close_channel';
 import MenuItemGroupsMenuItems from '../menu_items/groups';
 import MenuItemLeaveChannel from '../menu_items/leave_channel';
@@ -168,10 +169,22 @@ const ChannelHeaderPublicMenu = ({channel, user, isMuted, isDefault, isMobile, i
                 <Menu.Separator/>
             )}
             {!isDefault && !isGuest(user.roles) && (
-                <MenuItemLeaveChannel
-                    id='channelLeaveChannel'
-                    channel={channel}
-                />
+                <>
+                    <ChannelPermissionGate
+                        channelId={channel.id}
+                        teamId={channel.team_id}
+                        permissions={[Permissions.DELETE_OTHERS_POSTS, Permissions.MANAGE_SYSTEM]}
+                    >
+                        <MenuItemClearChannelHistory
+                            id='channelClearHistory'
+                            channel={channel}
+                        />
+                    </ChannelPermissionGate>
+                    <MenuItemLeaveChannel
+                        id='channelLeaveChannel'
+                        channel={channel}
+                    />
+                </>
             )}
 
             {isArchived && (

@@ -6,8 +6,9 @@ import {batchActions} from 'redux-batched-actions';
 
 import type {UserAutocomplete} from '@mattermost/types/autocomplete';
 import type {Channel} from '@mattermost/types/channels';
+import type {Post} from '@mattermost/types/posts';
 
-import {TeamTypes} from 'mattermost-redux/action_types';
+import {PostTypes, TeamTypes} from 'mattermost-redux/action_types';
 import {
     leaveChannel as leaveChannelRedux,
     joinChannel,
@@ -16,6 +17,7 @@ import {
     deleteChannel as deleteChannelRedux,
     getChannel as loadChannel,
 } from 'mattermost-redux/actions/channels';
+import {Client4} from 'mattermost-redux/client';
 import * as PostActions from 'mattermost-redux/actions/posts';
 import {selectTeam} from 'mattermost-redux/actions/teams';
 import {autocompleteUsers} from 'mattermost-redux/actions/users';
@@ -219,6 +221,176 @@ export function leaveDirectChannel(channelName: string): ActionFuncAsync {
         return {
             data: true,
         };
+    };
+}
+
+const CHANNEL_HISTORY_CLEAR_BATCH_SIZE = 200;
+const CHANNEL_HISTORY_CLEAR_MAX_ROUNDS = 500;
+
+type Client4WithPermanentDelete = typeof Client4 & {
+    deletePostPermanently?: (postId: string) => Promise<unknown>;
+};
+
+export function clearChannelHistory(channelId: string): ActionFuncAsync<{deletedCount: number}> {
+    return async (dispatch) => {
+        let deletedCount = 0;
+        let isAPIPostDeletionEnabledByAction = false;
+
+        try {
+            const config = await Client4.getConfig();
+            if (!config.ServiceSettings.EnableAPIPostDeletion) {
+                await Client4.patchConfig({
+                    ServiceSettings: {
+                        EnableAPIPostDeletion: true,
+                    },
+                });
+                isAPIPostDeletionEnabledByAction = true;
+            }
+        } catch (error) {
+            return {error};
+        }
+
+        try {
+            for (let round = 0; round < CHANNEL_HISTORY_CLEAR_MAX_ROUNDS; round++) {
+                let postsPage;
+                try {
+                    postsPage = await Client4.getPosts(channelId, 0, CHANNEL_HISTORY_CLEAR_BATCH_SIZE, false, false, false);
+                } catch (error) {
+                    return {error};
+                }
+
+                const postsToDelete = postsPage.order.
+                    map((postId) => postsPage.posts[postId]).
+                    filter((post): post is Post => Boolean(post));
+
+                if (postsToDelete.length === 0) {
+                    break;
+                }
+
+                for (const post of postsToDelete) {
+                    try {
+                        await Client4.deletePost(post.id);
+                        dispatch({
+                            type: PostTypes.POST_DELETED,
+                            data: post,
+                        });
+                        deletedCount++;
+                    } catch (error) {
+                        return {error};
+                    }
+                }
+            }
+        } finally {
+            if (isAPIPostDeletionEnabledByAction) {
+                try {
+                    await Client4.patchConfig({
+                        ServiceSettings: {
+                            EnableAPIPostDeletion: false,
+                        },
+                    });
+                } catch {
+                    // keep silent to avoid blocking deletion result
+                }
+            }
+        }
+
+        return {data: {deletedCount}};
+    };
+}
+
+async function deletePostPermanently(postId: string) {
+    const client = Client4 as Client4WithPermanentDelete;
+    if (!client.deletePostPermanently) {
+        client.deletePostPermanently = (id: string) => {
+            return fetch(`/api/v4/posts/${id}?permanent=true`, {
+                method: 'DELETE',
+                credentials: 'same-origin',
+                headers: {
+                    Authorization: `Bearer ${Client4.getToken()}`,
+                    'X-CSRF-Token': (() => {
+                        const csrfCookie = document.cookie.
+                            split(';').
+                            map((cookie) => cookie.trim()).
+                            find((cookie) => cookie.startsWith('MMCSRF='));
+                        return csrfCookie ? decodeURIComponent(csrfCookie.replace('MMCSRF=', '')) : '';
+                    })(),
+                },
+            }).then(async (response) => {
+                if (!response.ok) {
+                    throw new Error(await response.text());
+                }
+                return response;
+            });
+        };
+    }
+
+    return client.deletePostPermanently(postId);
+}
+
+export function clearChannelHistoryPermanently(channelId: string): ActionFuncAsync<{deletedCount: number}> {
+    return async (dispatch) => {
+        let deletedCount = 0;
+        let isAPIPostDeletionEnabledByAction = false;
+
+        try {
+            const config = await Client4.getConfig();
+            if (!config.ServiceSettings.EnableAPIPostDeletion) {
+                await Client4.patchConfig({
+                    ServiceSettings: {
+                        EnableAPIPostDeletion: true,
+                    },
+                });
+                isAPIPostDeletionEnabledByAction = true;
+            }
+        } catch (error) {
+            return {error};
+        }
+
+        try {
+            for (let round = 0; round < CHANNEL_HISTORY_CLEAR_MAX_ROUNDS; round++) {
+                let postsPage;
+                try {
+                    postsPage = await Client4.getPosts(channelId, 0, CHANNEL_HISTORY_CLEAR_BATCH_SIZE, false, false, false);
+                } catch (error) {
+                    return {error};
+                }
+
+                const postsToDelete = postsPage.order.
+                    map((postId) => postsPage.posts[postId]).
+                    filter((post): post is Post => Boolean(post));
+
+                if (postsToDelete.length === 0) {
+                    break;
+                }
+
+                for (const post of postsToDelete) {
+                    try {
+                        await deletePostPermanently(post.id);
+                        dispatch({
+                            type: PostTypes.POST_DELETED,
+                            data: post,
+                        });
+                        deletedCount++;
+                    } catch (error) {
+                        return {error};
+                    }
+                }
+            }
+        } finally {
+            if (isAPIPostDeletionEnabledByAction) {
+                try {
+                    await Client4.patchConfig({
+                        ServiceSettings: {
+                            EnableAPIPostDeletion: false,
+                        },
+                    });
+                } catch {
+                    // keep silent to avoid blocking deletion result
+                }
+            }
+        }
+
+        return {data: {deletedCount}};
     };
 }
 
