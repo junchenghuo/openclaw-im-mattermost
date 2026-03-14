@@ -394,6 +394,63 @@ export function clearChannelHistoryPermanently(channelId: string): ActionFuncAsy
     };
 }
 
+export function permanentDeleteChannel(channelId: string): ActionFuncAsync {
+    return async (dispatch, getState) => {
+        let isAPIChannelDeletionEnabledByAction = false;
+
+        try {
+            const config = await Client4.getConfig();
+            if (!config.ServiceSettings.EnableAPIChannelDeletion) {
+                await Client4.patchConfig({
+                    ServiceSettings: {
+                        EnableAPIChannelDeletion: true,
+                    },
+                });
+                isAPIChannelDeletionEnabledByAction = true;
+            }
+        } catch (error) {
+            return {error};
+        }
+
+        try {
+            const response = await fetch(`/api/v4/channels/${channelId}?permanent=true`, {
+                method: 'DELETE',
+                credentials: 'same-origin',
+                headers: {
+                    Authorization: `Bearer ${Client4.getToken()}`,
+                    'X-CSRF-Token': (() => {
+                        const csrfCookie = document.cookie.
+                            split(';').
+                            map((cookie) => cookie.trim()).
+                            find((cookie) => cookie.startsWith('MMCSRF='));
+                        return csrfCookie ? decodeURIComponent(csrfCookie.replace('MMCSRF=', '')) : '';
+                    })(),
+                },
+            });
+
+            if (!response.ok) {
+                return {error: new Error(await response.text())};
+            }
+        } catch (error) {
+            return {error};
+        } finally {
+            if (isAPIChannelDeletionEnabledByAction) {
+                try {
+                    await Client4.patchConfig({
+                        ServiceSettings: {
+                            EnableAPIChannelDeletion: false,
+                        },
+                    });
+                } catch {
+                    // keep silent to avoid blocking operation result
+                }
+            }
+        }
+
+        return dispatch(leaveChannel(channelId));
+    };
+}
+
 export function autocompleteUsersInChannel(prefix: string, channelId: string): ActionFuncAsync<UserAutocomplete> {
     const addLastViewAtToProfiles = makeAddLastViewAtToProfiles();
     return async (dispatch, getState) => {

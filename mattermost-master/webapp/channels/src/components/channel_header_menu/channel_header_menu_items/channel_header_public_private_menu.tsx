@@ -27,6 +27,7 @@ import MenuItemGroupsMenuItems from '../menu_items/groups';
 import MenuItemLeaveChannel from '../menu_items/leave_channel';
 import MenuItemNotification from '../menu_items/notification';
 import MenuItemOpenMembersRHS from '../menu_items/open_members_rhs';
+import MenuItemPermanentDeleteChannel from '../menu_items/permanent_delete_channel';
 import MenuItemPluginItems from '../menu_items/plugins_submenu';
 import MenuItemToggleFavoriteChannel from '../menu_items/toggle_favorite_channel';
 import MenuItemToggleInfo from '../menu_items/toggle_info';
@@ -180,6 +181,17 @@ const ChannelHeaderPublicMenu = ({channel, user, isMuted, isDefault, isMobile, i
                             channel={channel}
                         />
                     </ChannelPermissionGate>
+                    {!isArchived && (
+                        <ChannelPermissionGate
+                            channelId={channel.id}
+                            teamId={channel.team_id}
+                            permissions={[channelDeletePermission]}
+                        >
+                            <MenuItemArchiveChannel
+                                channel={channel}
+                            />
+                        </ChannelPermissionGate>
+                    )}
                     <MenuItemLeaveChannel
                         id='channelLeaveChannel'
                         channel={channel}
@@ -191,24 +203,16 @@ const ChannelHeaderPublicMenu = ({channel, user, isMuted, isDefault, isMobile, i
                 <MenuItemCloseChannel/>
             )}
 
-            {!isArchived && !isDefault && (
-                <ChannelPermissionGate
-                    channelId={channel.id}
-                    teamId={channel.team_id}
-                    permissions={[channelDeletePermission]}
-                >
-                    <MenuItemArchiveChannel
-                        channel={channel}
-                    />
-                </ChannelPermissionGate>
-            )}
-
             {isArchived && !isDefault && (
                 <ChannelPermissionGate
                     channelId={channel.id}
                     teamId={channel.team_id}
                     permissions={[channelUnarchivePermission]}
                 >
+                    <MenuItemPermanentDeleteChannel
+                        id='channelPermanentDelete'
+                        channel={channel}
+                    />
                     <MenuItemUnarchiveChannel
                         channel={channel}
                     />
